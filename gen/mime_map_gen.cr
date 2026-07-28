@@ -3,7 +3,7 @@ require "csv"
 require "http/client"
 
 module MimeMapGen
-  DEFAULT_SOURCE = "https://www.iana.org/assignments/media-types/application.csv"
+  DEFAULT_SOURCE     = "https://www.iana.org/assignments/media-types/application.csv"
   DEFAULT_OUTPUT_DIR = "src"
 
   record Entry, name : String, media_type : String
