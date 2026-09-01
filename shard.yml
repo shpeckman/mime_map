@@ -3,8 +3,14 @@ name: mime_map
 version: 0.2.0
 
 authors:
-  - shpeckman <geelenrobin@proton.me>
+  - shpeckman
 
-crystal: '>= 1.21.0'
+description: Crystal shard for mapping MIME types to file names and vice versa, dynamically generated from IANA registry data.
+repository: https://github.com/shpeckman/mime_map
+
+crystal: '>= 1.0.0'
 
 license: MIT
+
+scripts:
+  postinstall: make
