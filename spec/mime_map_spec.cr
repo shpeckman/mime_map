@@ -134,4 +134,3 @@ describe MimeMap do
     end
   end
 end
-

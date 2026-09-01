@@ -32,4 +32,3 @@ Benchmark.ips do |x|
   x.report("image? (type hit)") { MimeMap.image?("image/png") }
   x.report("image? (miss)") { MimeMap.image?("application/json") }
 end
-

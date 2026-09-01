@@ -11,7 +11,7 @@ VALID_MAPPINGS = {
   "jpg"                      => "image/jpeg",
   "jpeg"                     => "image/jpeg",
   "json"                     => "application/json",
-  "png"                      => "image/png"
+  "png"                      => "image/png",
 }
 
 INVALID_NAMES = [
@@ -27,4 +27,3 @@ INVALID_TYPES = [
   "zip",
   "text/plain-invalid",
 ]
-

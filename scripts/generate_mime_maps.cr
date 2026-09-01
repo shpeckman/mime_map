@@ -24,14 +24,14 @@ module GenerateMimeMap
   end
 
   def self.run(output_dir : String) : Nil
-    ext_to_type = {} of String => String
+    ext_to_type  = {} of String => String
     type_to_exts = {} of String => Array(String)
 
     IANA_REGISTRIES.each do |registry|
       body = read("https://www.iana.org/assignments/media-types/#{registry}.csv")
-      csv = CSV.new(body, headers: true)
+      csv  = CSV.new(body, headers: true)
       while csv.next
-        name = csv["Name"].strip.downcase
+        name       = csv["Name"].strip.downcase
         media_type = csv["Template"].strip.downcase
         next if name.empty? || media_type.empty?
 
@@ -47,9 +47,9 @@ module GenerateMimeMap
       next if line.empty? || line.starts_with?('#')
       parts = line.split(/\s+/)
       next if parts.size < 2
-      
+
       media_type = parts[0].downcase
-      exts = parts[1..].map(&.downcase)
+      exts       = parts[1..].map(&.downcase)
 
       type_to_exts[media_type] ||= [] of String
       exts.each do |ext|
@@ -97,4 +97,3 @@ end
 
 output_dir = ARGV[0]? || GenerateMimeMap::DEFAULT_OUTPUT_DIR
 GenerateMimeMap.run(output_dir)
-
