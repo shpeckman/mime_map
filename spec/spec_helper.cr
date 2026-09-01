@@ -8,6 +8,10 @@ VALID_MAPPINGS = {
   "zstd"                     => "application/zstd",
   "1d-interleaved-parityfec" => "application/1d-interleaved-parityfec",
   "3gpdash-qoe-report+xml"   => "application/3gpdash-qoe-report+xml",
+  "jpg"                      => "image/jpeg",
+  "jpeg"                     => "image/jpeg",
+  "json"                     => "application/json",
+  "png"                      => "image/png"
 }
 
 INVALID_NAMES = [
@@ -19,7 +23,8 @@ INVALID_NAMES = [
 
 INVALID_TYPES = [
   "application/invalid",
-  "video/mp4",
+  "video/mp4-invalid",
   "zip",
-  "text/plain",
+  "text/plain-invalid",
 ]
+

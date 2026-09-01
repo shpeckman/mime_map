@@ -3,10 +3,11 @@ require "csv"
 require "http/client"
 
 module GenerateMimeMap
-  DEFAULT_SOURCE     = "https://www.iana.org/assignments/media-types/application.csv"
+  IANA_REGISTRIES = %w(
+    application audio font image message model multipart text video
+  )
+  APACHE_MIME_TYPES  = "https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types"
   DEFAULT_OUTPUT_DIR = "src"
-
-  record Entry, name : String, media_type : String
 
   def self.read(source : String) : String
     if source.starts_with?("http://") || source.starts_with?("https://")
@@ -18,58 +19,82 @@ module GenerateMimeMap
     end
   end
 
-  def self.parse(body : String) : Array(Entry)
-    entries = [] of Entry
-    csv     = CSV.new(body, headers: true)
-    while csv.next
-      name       = csv["Name"].strip
-      media_type = csv["Template"].strip
-      next if name.empty? || media_type.empty?
-      entries << Entry.new(name, media_type)
-    end
-    entries.sort_by!(&.name)
-  end
-
   def self.escape(value : String) : String
     value.gsub('\\', "\\\\").gsub('"', "\\\"")
   end
 
-  def self.emit_map(io : IO, path : String, constant : String, pairs : Array({String, String})) : Nil
-    io << "# " << path << '\n'
-    io << '\n'
-    io << "module MimeMap\n"
-    io << "  " << constant << " = {\n"
-    pairs.each do |key, value|
-      io << "    \"" << escape(key) << "\" => \"" << escape(value) << "\",\n"
-    end
-    io << "  }\n"
-    io << "end\n"
-  end
+  def self.run(output_dir : String) : Nil
+    ext_to_type = {} of String => String
+    type_to_exts = {} of String => Array(String)
 
-  def self.emit(entries : Array(Entry), output_dir : String) : Nil
+    IANA_REGISTRIES.each do |registry|
+      body = read("https://www.iana.org/assignments/media-types/#{registry}.csv")
+      csv = CSV.new(body, headers: true)
+      while csv.next
+        name = csv["Name"].strip.downcase
+        media_type = csv["Template"].strip.downcase
+        next if name.empty? || media_type.empty?
+
+        ext_to_type[name] = media_type unless ext_to_type.has_key?(name)
+        type_to_exts[media_type] ||= [] of String
+        type_to_exts[media_type] << name
+      end
+    end
+
+    body = read(APACHE_MIME_TYPES)
+    body.each_line do |line|
+      line = line.strip
+      next if line.empty? || line.starts_with?('#')
+      parts = line.split(/\s+/)
+      next if parts.size < 2
+      
+      media_type = parts[0].downcase
+      exts = parts[1..].map(&.downcase)
+
+      type_to_exts[media_type] ||= [] of String
+      exts.each do |ext|
+        ext_to_type[ext] = media_type
+        type_to_exts[media_type] << ext
+      end
+    end
+
+    type_to_exts.each do |k, v|
+      type_to_exts[k] = v.uniq.sort
+    end
+
     map_dir = File.join(output_dir, "mime_map")
     Dir.mkdir_p(map_dir)
 
-    name_to_type_path = File.join(map_dir, "name_to_type.cr")
-    File.open(name_to_type_path, "w") do |io|
-      pairs = entries.map { |entry| {entry.name, entry.media_type} }
-      emit_map(io, name_to_type_path, "NAME_TO_TYPE", pairs)
+    ext_to_type_path = File.join(map_dir, "ext_to_type.cr")
+    File.open(ext_to_type_path, "w") do |io|
+      io << "# " << ext_to_type_path << '\n'
+      io << "module MimeMap\n"
+      io << "  EXT_TO_TYPE = {\n"
+      ext_to_type.to_a.sort_by(&.first).each do |key, value|
+        io << "    \"" << escape(key) << "\" => \"" << escape(value) << "\",\n"
+      end
+      io << "  }\n"
+      io << "end\n"
     end
 
-    type_to_name_path = File.join(map_dir, "type_to_name.cr")
-    File.open(type_to_name_path, "w") do |io|
-      pairs = entries.sort_by(&.media_type).map { |entry| {entry.media_type, entry.name} }
-      emit_map(io, type_to_name_path, "TYPE_TO_NAME", pairs)
+    type_to_exts_path = File.join(map_dir, "type_to_exts.cr")
+    File.open(type_to_exts_path, "w") do |io|
+      io << "# " << type_to_exts_path << '\n'
+      io << "module MimeMap\n"
+      io << "  TYPE_TO_EXTS = {\n"
+      type_to_exts.to_a.sort_by(&.first).each do |key, values|
+        io << "    \"" << escape(key) << "\" => ["
+        io << values.map { |v| "\"#{escape(v)}\"" }.join(", ")
+        io << "],\n"
+      end
+      io << "  }\n"
+      io << "end\n"
     end
-  end
 
-  def self.run(source : String, output_dir : String) : Nil
-    entries = parse(read(source))
-    emit(entries, output_dir)
-    STDERR.puts "Wrote #{entries.size} entries to #{output_dir}/"
+    STDERR.puts "Wrote #{ext_to_type.size} extensions and #{type_to_exts.size} MIME types to #{output_dir}/"
   end
 end
 
-source     = ARGV[0]? || GenerateMimeMap::DEFAULT_SOURCE
-output_dir = ARGV[1]? || GenerateMimeMap::DEFAULT_OUTPUT_DIR
-GenerateMimeMap.run(source, output_dir)
+output_dir = ARGV[0]? || GenerateMimeMap::DEFAULT_OUTPUT_DIR
+GenerateMimeMap.run(output_dir)
+

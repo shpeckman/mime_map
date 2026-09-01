@@ -1,5 +1,5 @@
 # makefile
-GENERATED_FILES = src/mime_map/type_to_name.cr src/mime_map/name_to_type.cr
+GENERATED_FILES = src/mime_map/*.cr
 
 .PHONY: all clean gen spec bench
 
