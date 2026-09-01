@@ -1,6 +1,7 @@
-GENERATED_FILES = src/mime_map.cr src/mime_map/type_to_name.cr src/mime_map/name_to_type.cr
+# makefile
+GENERATED_FILES = src/mime_map/type_to_name.cr src/mime_map/name_to_type.cr
 
-.PHONY: all gen clean-full
+.PHONY: all gen clean
 
 all: gen
 
