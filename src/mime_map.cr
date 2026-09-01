@@ -37,5 +37,15 @@ module MimeMap
     return nil if ext.empty?
     from_ext(ext)
   end
+
+  private def self.resolve_media_type(input : String) : String
+    from_filename(input) || from_ext(input) || input.downcase
+  end
+
+  {% for category in %w(application audio font image message model multipart text video) %}
+    def self.{{category.id}}?(input : String) : Bool
+      resolve_media_type(input).starts_with?("{{category.id}}/")
+    end
+  {% end %}
 end
 

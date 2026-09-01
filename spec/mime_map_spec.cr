@@ -114,5 +114,24 @@ describe MimeMap do
       MimeMap.from_filename("/path/to/image.png").should eq("image/png")
     end
   end
+
+  describe "category checkers" do
+    it "checks if an input matches a category" do
+      MimeMap.image?("png").should be_true
+      MimeMap.image?(".png").should be_true
+      MimeMap.image?("photo.png").should be_true
+      MimeMap.image?("/path/to/photo.png").should be_true
+      MimeMap.image?("image/png").should be_true
+      MimeMap.image?("IMAGE/PNG").should be_true
+      MimeMap.image?("json").should be_false
+      MimeMap.image?("application/json").should be_false
+
+      MimeMap.application?("zip").should be_true
+      MimeMap.application?("image/png").should be_false
+
+      MimeMap.text?("text/plain").should be_true
+      MimeMap.text?("application/zip").should be_false
+    end
+  end
 end
 
