@@ -27,6 +27,11 @@ Benchmark.ips do |x|
   x.report("from_ext (hit)") { MimeMap.from_ext(".zip") }
   x.report("from_filename (hit)") { MimeMap.from_filename(filename) }
 
+  x.report("category? (ext hit)") { MimeMap.category?(name) }
+  x.report("category? (filename hit)") { MimeMap.category?(filename) }
+  x.report("category? (type hit)") { MimeMap.category?(type) }
+  x.report("category? (miss)") { MimeMap.category?(missing_name) }
+
   x.report("image? (ext hit)") { MimeMap.image?("png") }
   x.report("image? (filename hit)") { MimeMap.image?("photo.png") }
   x.report("image? (type hit)") { MimeMap.image?("image/png") }

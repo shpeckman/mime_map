@@ -115,6 +115,40 @@ describe MimeMap do
     end
   end
 
+  describe ".category?" do
+    it "returns the correct category for an extension" do
+      MimeMap.category?("png").should eq(MimeMap::Category::Image)
+      MimeMap.category?(".zip").should eq(MimeMap::Category::Application)
+    end
+
+    it "returns the correct category for a filename" do
+      MimeMap.category?("document.pdf").should eq(MimeMap::Category::Application)
+      MimeMap.category?("/var/www/image.jpg").should eq(MimeMap::Category::Image)
+    end
+
+    it "returns the correct category for a mime type" do
+      MimeMap.category?("application/json").should eq(MimeMap::Category::Application)
+      MimeMap.category?("audio/mpeg").should eq(MimeMap::Category::Audio)
+    end
+
+    it "returns nil for unknown inputs" do
+      MimeMap.category?("invalid-ext").should be_nil
+      MimeMap.category?("unknown/type").should be_nil
+    end
+  end
+
+  describe ".category" do
+    it "returns the mapped category" do
+      MimeMap.category("png").should eq(MimeMap::Category::Image)
+    end
+
+    it "raises KeyError for missing category" do
+      expect_raises(KeyError) do
+        MimeMap.category("invalid-ext")
+      end
+    end
+  end
+
   describe "category checkers" do
     it "checks if an input matches a category" do
       MimeMap.image?("png").should be_true

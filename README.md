@@ -1,4 +1,3 @@
-<!-- README.md -->
 # mime_map
 
 A blazing fast, lightweight Crystal shard for bidirectional mapping between file extensions and MIME/media types. 
@@ -9,12 +8,12 @@ A blazing fast, lightweight Crystal shard for bidirectional mapping between file
 
 1. Add the dependency to your `shard.yml`:
 
-   ```yaml
+```yaml
    dependencies:
      mime_map:
        github: shpeckman/mime_map
-       version: ~> 0.2.0
-   ```
+       version: ~> 1.0.0
+```
 
 2. Run `shards install`
 
@@ -25,55 +24,42 @@ A blazing fast, lightweight Crystal shard for bidirectional mapping between file
 ```crystal
 require "mime_map"
 
-# --- Basic Lookups ---
+MimeMap.media_type?("json")
+MimeMap.media_type?("ZIP")
+MimeMap.media_type?("foo")
 
-# Safely lookup a MIME type by extension (case-insensitive)
-MimeMap.media_type?("json") # => "application/json"
-MimeMap.media_type?("ZIP")  # => "application/zip"
-MimeMap.media_type?("foo")  # => nil
+MimeMap.media_type("csv")
 
-# Strict lookup (raises KeyError if not found)
-MimeMap.media_type("csv")   # => "text/csv"
+MimeMap.media_type("unknown", "application/octet-stream")
 
-# Lookup with a fallback default
-MimeMap.media_type("unknown", "application/octet-stream") # => "application/octet-stream"
+MimeMap.name?("application/json")
 
+MimeMap.extensions("image/jpeg")
 
-# --- Reverse Lookups ---
+MimeMap.from_ext(".png")
 
-# Get the primary extension for a MIME type
-MimeMap.name?("application/json") # => "json"
+MimeMap.from_filename("/var/www/uploads/document.pdf")
+MimeMap.from_filename("Makefile")
 
-# Get all known extensions for a MIME type
-MimeMap.extensions("image/jpeg")  # => ["jpeg", "jpg"]
+MimeMap.category?("png")
+MimeMap.category?("archive.zip")
+MimeMap.category?("invalid-ext")
 
+MimeMap.category("document.pdf")
 
-# --- File Path Helpers ---
+MimeMap.image?("png")
+MimeMap.image?("photo.png")
+MimeMap.image?("image/png")
+MimeMap.image?("application/json")
 
-# Lookup by extension with a leading dot
-MimeMap.from_ext(".png") # => "image/png"
-
-# Lookup directly from a file path
-MimeMap.from_filename("/var/www/uploads/document.pdf") # => "application/pdf"
-MimeMap.from_filename("Makefile")                      # => nil
-
-
-# --- Category Checkers ---
-
-# Easily verify if an extension, path, or MIME type belongs to a specific category
-MimeMap.image?("png")                  # => true
-MimeMap.image?("photo.png")            # => true
-MimeMap.image?("image/png")            # => true
-MimeMap.image?("application/json")     # => false
-
-MimeMap.audio?("mp3")                  # => true
-MimeMap.application?("document.pdf")   # => true
-MimeMap.text?("text/html")             # => true
+MimeMap.audio?("mp3")
+MimeMap.application?("document.pdf")
+MimeMap.text?("text/html")
 ```
 
 ## Available Category Checkers
 
-The following category checking methods are automatically generated:
+The following category checking methods are automatically generated and backed by the `MimeMap::Category` enum:
 
 * `MimeMap.application?(input)`
 * `MimeMap.audio?(input)`
@@ -87,7 +73,7 @@ The following category checking methods are automatically generated:
 
 ## Contributing
 
-1. Fork it (<https://github.com/shpeckman/mime_map/fork>)
+1. Fork it ([https://github.com/shpeckman/mime_map/fork](https://www.google.com/search?q=https://github.com/shpeckman/mime_map/fork))
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
